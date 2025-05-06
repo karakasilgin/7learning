@@ -1,0 +1,46 @@
+Google BigQuery
+
+SELECT  FROM `ageless-answer-459012-c1.ilginkarakas_dataset.coding_challenge` LIMIT 1000
+'Part 1 – Data Preprocessing with BigQuery
+'🔹 1. Filter data between 2000–2005 and station numbers 725300–726300
+
+%%bigquery df_filtered
+
+SELECT *
+FROM `ageless-answer-459012-c1.ilginkarakas_dataset.coding_challenge`
+WHERE EXTRACT(YEAR FROM date) BETWEEN 2000 AND 2005
+  AND station_number BETWEEN 725300 AND 726300
+
+'2. ✅ Narrow to stations 725300–725330
+
+%%bigquery df_narrow
+SELECT *
+FROM `ageless-answer-459012-c1.ilginkarakas_dataset.coding_challenge`
+WHERE EXTRACT(YEAR FROM date) BETWEEN 2000 AND 2005
+  AND station_number BETWEEN 725300 AND 725330
+
+'3. ✅ Year with most snow occurrences  
+%%bigquery snowiest_year
+SELECT 
+  EXTRACT(YEAR FROM date) AS year,
+  COUNTIF(snow) AS snow_days
+FROM `ageless-answer-459012-c1.ilginkarakas_dataset.coding_challenge`
+WHERE station_number BETWEEN 725300 AND 725330
+  AND EXTRACT(YEAR FROM date) BETWEEN 2000 AND 2005
+GROUP BY year
+ORDER BY snow_days DESC
+LIMIT 1
+
+'4. ✅ Compute daily change in snow depth
+%%bigquery df_snow_change
+SELECT
+  station_number,
+  date,
+  snow_depth,
+  LAG(snow_depth) OVER (PARTITION BY station_number ORDER BY date) AS prev_snow_depth,
+  snow_depth - LAG(snow_depth) OVER (PARTITION BY station_number ORDER BY date) AS snow_depth_change
+FROM `ageless-answer-459012-c1.ilginkarakas_dataset.coding_challenge`
+WHERE EXTRACT(YEAR FROM date) BETWEEN 2000 AND 2005
+  AND station_number BETWEEN 725300 AND 725330
+
+
